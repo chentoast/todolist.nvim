@@ -5,14 +5,9 @@ endif
 let s:save_cpo = &cpo
 set cpo&vim
 
-let g:todo_keywords = ["TODO"]
+let g:todo_keywords = ["TODO", "DONE"]
 
-let g:todo_tags = ["home", "school", "appointment"]
-
-function! CompleteTags()
-    call complete(col("."), g:todo_tags)
-    return ''
-endfunction
+let g:todo_tags = ["home", "work", "appointment"]
 
 let g:todolist_loaded=1
 

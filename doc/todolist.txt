@@ -1,13 +1,13 @@
-TODOLIST - basic highlighting and functionality for todo lists in asciidoctor files
+TODOLIST - basic highlighting and functionality for todo lists
 
 =====================================================================================
 OVERVIEW                                                        *todolist*
 
 TODOLIST is a small lua plugin designed to enable syntax highlighting and
-basic helper functions for building and viewing todo lists in asciidoc files.
+basic utilites for building and viewing todo lists in asciidoc files.
 
-Most of the functionality is inspired by org-mode, although this plugin only
-provides a fraction of the features that org-mode does.
+Most of the functionality is inspired by and derived from org-mode, although 
+this plugin only provides a fraction of the features that org-mode does.
 
 =====================================================================================
 USAGE                                                           *todolist-usage*
@@ -16,7 +16,7 @@ USAGE                                                           *todolist-usage*
 FEATURES                                                        *todolist-features*
 
 -------------------------------------------------------------------------------------
-Todo Toggles
+Todo Keywords
 
 -------------------------------------------------------------------------------------
 Checkboxes
@@ -32,3 +32,12 @@ Deadlines
 
 -------------------------------------------------------------------------------------
 Todo File Popup
+
+-------------------------------------------------------------------------------------
+Navigation - maybe
+
+-------------------------------------------------------------------------------------
+Folding - maybe
+
+=====================================================================================
+CONFIGURATION                                                   *todolist-config*
