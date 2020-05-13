@@ -97,4 +97,47 @@ local function cycle_todo_prev()
 end
 todo.cycle_todo_next = save_excursion(cycle_todo_prev)
 
+function todo.popup_todo_file()
+    local buf = api.nvim_create_buf(true, false)
+    -- local border_buf = api.nvim_create_buf(false, true)
+
+    local n_col = api.nvim_get_option("columns")
+    local n_row = api.nvim_get_option("lines")
+
+    local height = math.ceil(n_row * .7)
+    local width = math.ceil(n_col * .7)
+
+    local row = math.ceil((n_row - height) / 2)
+    local col = math.ceil((n_col - width) / 2)
+
+    local opts = {
+        style = "minimal",
+        relative = "editor",
+        width = width,
+        height = height,
+        row = row,
+        col = col
+    }
+
+    -- local border_opts = {
+    --     style = "minimal",
+    --     relative = "editor",
+    --     width = width + 4,
+    --     height = height + 2,
+    --     row = row,
+    --     col = col
+    -- }
+
+    win = api.nvim_open_win(buf, true, opts)
+    -- border_win = api.nvim_open_win(border_buf, true, border_opts)
+
+    api.nvim_win_set_option(win, "winhl", "Normal:TodoFloatWin")
+    -- api.nvim_win_set_option(border_win, "winhl", "Normal:TodoFloatWin")
+    -- api.nvim_win_set_option(newwin, "winblend", 5)
+    api.nvim_set_current_win(win)
+    api.nvim_command("e " .. api.nvim_get_option("todo_capture_file"))
+end
+
+todo.popup_todo_file()
+
 return todo
