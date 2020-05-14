@@ -97,7 +97,7 @@ local function cycle_todo_prev()
 end
 todo.cycle_todo_next = save_excursion(cycle_todo_prev)
 
-function todo.popup_todo_file()
+function todo.popup_todo_file(filename)
     local buf = api.nvim_create_buf(true, false)
     local border_buf = api.nvim_create_buf(false, true)
     print(border_buf)
@@ -135,8 +135,9 @@ function todo.popup_todo_file()
     api.nvim_win_set_option(win, "winhl", "Normal:TodoFloatWin")
     api.nvim_win_set_option(border_win, "winhl", "Normal:TodoFloatWin")
     api.nvim_set_current_win(win)
-    api.nvim_command('au BufWinLeave <buffer> exe "silent bwipeout! "' .. border_buf)
-    api.nvim_command("e " .. api.nvim_get_option("todo_capture_file"))
+    -- api.nvim_command('au BufWinLeave <buffer> exe "silent bwipeout! "' .. border_buf)
+    api.nvim_command('au BufDelete <buffer> exe "silent bwipeout! "' .. border_buf)
+    api.nvim_command("e " .. filename)
 end
 
 return todo
