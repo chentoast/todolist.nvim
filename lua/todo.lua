@@ -99,7 +99,8 @@ todo.cycle_todo_next = save_excursion(cycle_todo_prev)
 
 function todo.popup_todo_file()
     local buf = api.nvim_create_buf(true, false)
-    -- local border_buf = api.nvim_create_buf(false, true)
+    local border_buf = api.nvim_create_buf(false, true)
+    print(border_buf)
 
     local n_col = api.nvim_get_option("columns")
     local n_row = api.nvim_get_option("lines")
@@ -119,25 +120,23 @@ function todo.popup_todo_file()
         col = col
     }
 
-    -- local border_opts = {
-    --     style = "minimal",
-    --     relative = "editor",
-    --     width = width + 4,
-    --     height = height + 2,
-    --     row = row,
-    --     col = col
-    -- }
+    local border_opts = {
+        style = "minimal",
+        relative = "editor",
+        width = width + 6,
+        height = height + 4,
+        row = row - 1,
+        col = col - 1
+    }
 
+    local border_win = api.nvim_open_win(border_buf, true, border_opts)
     win = api.nvim_open_win(buf, true, opts)
-    -- border_win = api.nvim_open_win(border_buf, true, border_opts)
 
     api.nvim_win_set_option(win, "winhl", "Normal:TodoFloatWin")
-    -- api.nvim_win_set_option(border_win, "winhl", "Normal:TodoFloatWin")
-    -- api.nvim_win_set_option(newwin, "winblend", 5)
+    api.nvim_win_set_option(border_win, "winhl", "Normal:TodoFloatWin")
     api.nvim_set_current_win(win)
+    api.nvim_command('au BufWinLeave <buffer> exe "silent bwipeout! "' .. border_buf)
     api.nvim_command("e " .. api.nvim_get_option("todo_capture_file"))
 end
-
-todo.popup_todo_file()
 
 return todo
