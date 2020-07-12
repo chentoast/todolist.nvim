@@ -1,4 +1,4 @@
-TODOLIST - basic highlighting and functionality for todo lists
+TODOLIST - basic highlighting and functionality for todo lists in asciidoc
 
 =====================================================================================
 OVERVIEW                                                        *todolist*
@@ -10,34 +10,118 @@ Most of the functionality is inspired by and derived from org-mode, although
 this plugin only provides a fraction of the features that org-mode does.
 
 =====================================================================================
-USAGE                                                           *todolist-usage*
-
-=====================================================================================
 FEATURES                                                        *todolist-features*
+
+-------------------------------------------------------------------------------------
+Syntax highlighting
+
+Todo items (described below) and other things are given syntax highlighting in
+asciidoc files.
+However, note that the syntax highlighting does not cover many corner cases,
+and is very likely to break.
+This is just the bare minimum of syntax highlighting I needed to get my todo
+configuration up and running.
 
 -------------------------------------------------------------------------------------
 Todo Keywords
 
+A todo item is any header or list item followed by a todo keyword.
+
+- TODO explain how TODO's work
+
+The list of todo keywords are configured through `g:todo_keywords`.
+By default, the keywords are ["TODO", "DONE"], but more keywords can be added
+through the `g:todo_keywords` variable.
+
+Pressing <localleader>] and <localleader>[ allows one to cycle through the todo
+keywords for a given list item, either forwards or backwards.
+
 -------------------------------------------------------------------------------------
 Checkboxes
+
+In addition to todo keywords, list items can also be annotated with checkboxes.
+Placing the [ ] symbol after a list item turns that item into a checkbox, and
+pressing <localleader>x ticks off the checkbox.
 
 -------------------------------------------------------------------------------------
 Priority
 
+Todo items can be given priorities ranging from A to Z.
+For example:
+
+- TODO (#A) Explain priority items
+
+To increment the priority letter for a todo item, press <localleader>k - this will
+add a priority annotation to the item if there did not exist one previously.
+<localleader>j decrements the priority letter for an item, and removes the
+priority annotation if the priority is at (#A).
+
 -------------------------------------------------------------------------------------
 Tags and Tag Completion
 
--------------------------------------------------------------------------------------
-Deadlines
+Any list item or heading can be annotated with a tag, which is
+configured through the `g:todo_tags` variable.
+Tags are simply words prefixed by an '@' symbol; for example:
+
+- TODO Explain tags @urgent
+
+Completion of tags is provided through the `CompleteTags` function, which is
+mapped to @<tab> in insert mode by default.
 
 -------------------------------------------------------------------------------------
 Todo File Popup
 
--------------------------------------------------------------------------------------
-Navigation - maybe
+Finally, todolist.nvim also supports an org-capture like interface for quickly
+jotting down todos in a given file.
+Calling the lua function `todo.popup_todo_file(filename)` brings up a floating
+neovim window with the file opened.
+This way, you can pop up your todo file with a single keypress and add
+a todo entry in a frictionless manner.
+
+For example, I have the following mapping in my init.vim:
+
+nnoremap <leader>t :lua require'todo'.popup_todo_file("~/wiki/todo.adoc")
+
+This allows me to quickly edit my todo file in a floating window whenever I
+need to write something down.
 
 -------------------------------------------------------------------------------------
-Folding - maybe
+Planned features
+
+- Deadlines and date support
+- Indentation for adoc files
+- Folding
+- Navigation (low priority)
 
 =====================================================================================
-CONFIGURATION                                                   *todolist-config*
+CONFIGURATION                                                       *todolist-config*
+
+Execute the following ex-command to view all of the functions provided by the
+plugin:
+
+        :lua print(vim.inspect(require'todo'))
+
+-------------------------------------------------------------------------------------
+g:todo_keyword
+
+Contains the keywords that mark a heading or list item as being a todo item
+
+        let g:todo_keywords = ["TODO", "WAITING", "DONE"]
+
+Default: ["TODO", "DONE"]
+
+-------------------------------------------------------------------------------------
+g:todo_tags
+
+Contains the set of all todo item tags.
+
+        let g:todo_tags = ["home", "work", "appointments", "school"]
+
+Default: ["home", "work", "appointments"]
+
+=====================================================================================
+CONTRIBUTING                                                       *todolist-contrib*
+
+This is the first real programming project that I've done, so there is bound
+to be a some amount of bugs and edge cases that I haven't accounted for.
+All pull requests and issues are welcome at github.com/chentau/todolist.nvim

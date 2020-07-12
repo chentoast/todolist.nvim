@@ -5,9 +5,13 @@ endif
 let s:save_cpo = &cpo
 set cpo&vim
 
-let g:todo_keywords = ["TODO", "DONE"]
+if !exists("g:todo_keywords")
+    let g:todo_keywords = ["TODO", "DONE"]
+endif
 
-let g:todo_tags = ["home", "work", "appointment"]
+if !exists("g:todo_tags")
+    let g:todo_tags = ["home", "work", "appointment"]
+endif
 
 " highlight group for floating todo window
 hi TodoFloatWin ctermbg=0, ctermfg=None
