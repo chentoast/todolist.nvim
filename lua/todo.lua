@@ -1,8 +1,8 @@
-todo = {}
+M = {}
 
 local api = vim.api
 -- table of todo keywords, where keys = 1, 2, ...
-local todo_kw = api.nvim_get_var("todo_keywords")
+local todo_kw = vim.g.todo_keywords
 local num_todo_kw = #todo_kw
 
 -- regex pattern to match for all todo keywords
@@ -35,34 +35,39 @@ local function save_excursion(func)
 end
 
 local function mark_checkbox()
-    api.nvim_command("sno/[ ]/[x]")
+    vim.cmd("sno/[ ]/[x]/e")
+    vim.cmd("noh")
 end
-todo.mark_checkbox = save_excursion(mark_checkbox)
+M.mark_checkbox = save_excursion(mark_checkbox)
 
 local function set_priority()
-    api.nvim_command("sno/\\(\\[=-]\\+ \\*" .. todo_kw_pattern .. "\\) /\\1 (#A) /")
+    vim.cmd([[sno/\(\[=-]\+ \*"]] .. todo_kw_pattern .. [[\) /\1 (#A) /e]])
+    vim.cmd("noh")
 end
-todo.set_priority = save_excursion(set_priority)
+M.set_priority = save_excursion(set_priority)
 
 local function increment_priority()
     -- If no priority, then set it
     if not vim.regex("(#[A-Z])"):match_str(api.nvim_get_current_line()) then
-        todo.set_priority()
+        M.set_priority()
     else
-        api.nvim_command("sno/(#\\(\\[A-Z]\\))/\\=\"(#\" . nr2char(char2nr(submatch(1)) + 1) . \")\"")
+        vim.cmd([[sno/(#\(\[A-Z]\))/\="(#" . nr2char(char2nr(submatch(1)) + 1) . ")"/e"]])
+        vim.cmd("noh")
     end
 end
-todo.increment_priority = save_excursion(increment_priority)
+M.increment_priority = save_excursion(increment_priority)
 
 local function decrement_priority()
     local cur_line = api.nvim_get_current_line()
     if vim.regex("(#A) "):match_str(cur_line) then
-        api.nvim_command("sno/(#A) //")
+        vim.cmd("sno/(#A) //")
+        vim.cmd("noh")
     elseif vim.regex("(#[A-Z])"):match_str(cur_line) then
-        api.nvim_command("sno/(#\\(\\[A-Z]\\))/\\=\"(#\" . nr2char(char2nr(submatch(1)) - 1) . \")\"")
+        vim.cmd([[sno/(#\(\[A-Z]\))/\="(#" . nr2char(char2nr(submatch(1)) - 1) . ")"/e]])
+        vim.cmd("noh")
     end
 end
-todo.decrement_priority = save_excursion(decrement_priority)
+M.decrement_priority = save_excursion(decrement_priority)
 
 local function add_new_entry()
     local cur_line = api.nvim_get_current_line()
@@ -73,7 +78,7 @@ local function add_new_entry()
         api.nvim_feedkeys('\r' .. string.sub(cur_line, match_idx_start + 1, match_idx_end), "m", true)
     end
 end
-todo.add_new_entry = save_excursion(add_new_entry)
+M.add_new_entry = save_excursion(add_new_entry)
 
 local function cycle_todo_next()
     local cur_line = api.nvim_get_current_line()
@@ -81,10 +86,10 @@ local function cycle_todo_next()
     local match_idx_start, match_idx_end = vim.regex(todo_kw_pattern):match_str(cur_line)
     if match_idx_start then
         local match = string.sub(cur_line, match_idx_start + 1, match_idx_end)
-        api.nvim_command("sno/" .. match .. "/" .. todo_kw_next[match])
+        vim.cmd("sno/" .. match .. "/" .. todo_kw_next[match] .. "/e")
     end
 end
-todo.cycle_todo_next = save_excursion(cycle_todo_next)
+M.cycle_todo_next = save_excursion(cycle_todo_next)
 
 local function cycle_todo_prev()
     local cur_line = api.nvim_get_current_line()
@@ -92,15 +97,32 @@ local function cycle_todo_prev()
     local match_idx_start, match_idx_end = vim.regex(todo_kw_pattern):match_str(cur_line)
     if match_idx_start then
         local match = string.sub(cur_line, match_idx_start + 1, match_idx_end)
-        api.nvim_command("sno/" .. match .. "/" .. todo_kw_prev[match])
+        vim.cmd("sno/" .. match .. "/" .. todo_kw_prev[match])
     end
 end
-todo.cycle_todo_next = save_excursion(cycle_todo_prev)
+M.cycle_todo_prev = save_excursion(cycle_todo_prev)
 
-function todo.popup_todo_file(filename)
-    local buf = api.nvim_create_buf(true, false)
+function M.open_project_todo()
+    local root = io.popen("git rev-parse --show-toplevel 2>/dev/null"):read("*a")
+    -- strip newline
+    root = root:sub(1, -2)
+    if root == '' then
+        api.nvim_err_writeln("not in git repo!")
+    else
+        vim.cmd('e ' .. root .. '/todo.adoc')
+    end
+end
+
+function M.todo_capture(filename)
+end
+
+function M.popup_todo_file(filename)
+    local buf = api.nvim_create_buf(false, true)
     local border_buf = api.nvim_create_buf(false, true)
-    print(border_buf)
+
+    if buf == 0 or border_buf == 0 then
+        return
+    end
 
     local n_col = api.nvim_get_option("columns")
     local n_row = api.nvim_get_option("lines")
@@ -126,18 +148,22 @@ function todo.popup_todo_file(filename)
         width = width + 6,
         height = height + 4,
         row = row - 1,
-        col = col - 1
+        col = col - 2
     }
 
     local border_win = api.nvim_open_win(border_buf, true, border_opts)
-    win = api.nvim_open_win(buf, true, opts)
+    local win = api.nvim_open_win(buf, true, opts)
+
+    if border_win == 0 or win == 0 then
+        return
+    end
 
     api.nvim_win_set_option(win, "winhl", "Normal:TodoFloatWin")
     api.nvim_win_set_option(border_win, "winhl", "Normal:TodoFloatWin")
+
     api.nvim_set_current_win(win)
-    -- api.nvim_command('au BufWinLeave <buffer> exe "silent bwipeout! "' .. border_buf)
-    api.nvim_command('au BufDelete <buffer> exe "silent bwipeout! "' .. border_buf)
-    api.nvim_command("e " .. filename)
+    vim.cmd("e " .. filename)
+    vim.cmd('au BufWipeout <buffer> silent bw! ' .. border_buf)
 end
 
-return todo
+return M
