@@ -48,7 +48,9 @@ M.set_priority = save_excursion(set_priority)
 
 local function increment_priority()
     -- If no priority, then set it
-    if not vim.regex("(#[A-Z])"):match_str(api.nvim_get_current_line()) then
+    -- if not vim.regex("(#[A-Z])"):match_str(api.nvim_get_current_line()) then
+    local cur_line = api.nvim_get_current_line()
+    if not string.find(cur_line, "%(#[A-Z]%)") then
         M.set_priority()
     else
         vim.cmd([[sno/(#\(\[A-Z]\))/\="(#" . nr2char(char2nr(submatch(1)) + 1) . ")"/e"]])
@@ -59,11 +61,13 @@ M.increment_priority = save_excursion(increment_priority)
 
 local function decrement_priority()
     local cur_line = api.nvim_get_current_line()
-    if vim.regex("(#A) "):match_str(cur_line) then
+    -- if vim.regex("(#A) "):match_str(cur_line) then
+    if string.find(cur_line, "%(#A%)") then
         vim.cmd("sno/(#A) //")
         vim.cmd("noh")
-    elseif vim.regex("(#[A-Z])"):match_str(cur_line) then
-        vim.cmd([[sno/(#\(\[A-Z]\))/\="(#" . nr2char(char2nr(submatch(1)) - 1) . ")"/e]])
+    -- elseif vim.regex("(#[A-Z])"):match_str(cur_line) then
+    elseif string.find(cur_line, "%(#[B-Z]%)") then
+        vim.cmd([[sno/(#\(\[B-Z]\))/\="(#" . nr2char(char2nr(submatch(1)) - 1) . ")"/e]])
         vim.cmd("noh")
     end
 end
